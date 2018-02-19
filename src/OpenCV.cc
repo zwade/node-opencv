@@ -13,6 +13,8 @@ void OpenCV::Init(Local<Object> target) {
   Nan::SetMethod(target, "readImage", ReadImage);
   Nan::SetMethod(target, "readImageAsync", ReadImageAsync);
   Nan::SetMethod(target, "readImageMulti", ReadImageMulti);
+  Nan::SetMethod(target, "hconcat", Hconcat);
+  Nan::SetMethod(target, "vconcat", Vconcat);
 }
 
 
@@ -398,6 +400,46 @@ NAN_METHOD(OpenCV::ReadImageMulti) {
   }
 
   return;
+}
+
+NAN_METHOD(OpenCV::Hconcat) {
+	if (!info[0]->IsArray()) {
+		Nan::ThrowTypeError("The argument must be an array");
+	}
+	v8::Local<v8::Array> jsChannels = v8::Local<v8::Array>::Cast(info[0]);
+
+	unsigned int L = jsChannels->Length();
+	std::vector<cv::Mat> vChannels(L);
+	for (unsigned int i = 0; i < L; i++) {
+		Matrix * matObject = Nan::ObjectWrap::Unwrap<Matrix>(jsChannels->Get(i)->ToObject());
+		vChannels[i] = matObject->mat;
+	}
+
+	cv::Mat result;
+	cv::hconcat(vChannels, result);
+	info.GetReturnValue().Set(result);
+	return;
+
+}
+
+NAN_METHOD(OpenCV::Hconcat) {
+	if (!info[0]->IsArray()) {
+		Nan::ThrowTypeError("The argument must be an array");
+	}
+	v8::Local<v8::Array> jsChannels = v8::Local<v8::Array>::Cast(info[0]);
+
+	unsigned int L = jsChannels->Length();
+	std::vector<cv::Mat> vChannels(L);
+	for (unsigned int i = 0; i < L; i++) {
+		Matrix * matObject = Nan::ObjectWrap::Unwrap<Matrix>(jsChannels->Get(i)->ToObject());
+		vChannels[i] = matObject->mat;
+	}
+
+	cv::Mat result;
+	cv::vconcat(vChannels, result);
+	info.GetReturnValue().Set(result);
+	return;
+
 }
 #else
 NAN_METHOD(OpenCV::ReadImageMulti) {
