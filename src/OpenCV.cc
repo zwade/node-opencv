@@ -357,6 +357,54 @@ NAN_METHOD(OpenCV::ReadImage) {
   return;
 }
 
+NAN_METHOD(OpenCV::Hconcat) {
+	if (!info[0]->IsArray()) {
+		Nan::ThrowTypeError("The argument must be an array");
+	}
+	v8::Local<v8::Array> jsChannels = v8::Local<v8::Array>::Cast(info[0]);
+
+	unsigned int L = jsChannels->Length();
+	std::vector<cv::Mat> vChannels(L);
+	for (unsigned int i = 0; i < L; i++) {
+		Matrix * matObject = Nan::ObjectWrap::Unwrap<Matrix>(jsChannels->Get(i)->ToObject());
+		vChannels[i] = matObject->mat;
+	}
+
+	Local < Object > im_h =
+	Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
+
+	Matrix *m = Nan::ObjectWrap::Unwrap<Matrix>(im_h);
+
+	cv::hconcat(vChannels, L, m->mat);
+	info.GetReturnValue().Set(im_h);
+	return;
+
+}
+
+NAN_METHOD(OpenCV::Vconcat) {
+	if (!info[0]->IsArray()) {
+		Nan::ThrowTypeError("The argument must be an array");
+	}
+	v8::Local<v8::Array> jsChannels = v8::Local<v8::Array>::Cast(info[0]);
+
+	unsigned int L = jsChannels->Length();
+	std::vector<cv::Mat> vChannels(L);
+	for (unsigned int i = 0; i < L; i++) {
+		Matrix * matObject = Nan::ObjectWrap::Unwrap<Matrix>(jsChannels->Get(i)->ToObject());
+		vChannels[i] = matObject->mat;
+	}
+
+	Local < Object > im_h =
+	Nan::NewInstance(Nan::GetFunction(Nan::New(Matrix::constructor)).ToLocalChecked()).ToLocalChecked();
+
+	Matrix *m = Nan::ObjectWrap::Unwrap<Matrix>(im_h);
+
+	cv::vconcat(vChannels, L, m->mat);
+	info.GetReturnValue().Set(im_h);
+	return;
+
+}
+
 #if CV_MAJOR_VERSION >= 3
 NAN_METHOD(OpenCV::ReadImageMulti) {
   Nan::EscapableHandleScope scope;
@@ -402,45 +450,6 @@ NAN_METHOD(OpenCV::ReadImageMulti) {
   return;
 }
 
-NAN_METHOD(OpenCV::Hconcat) {
-	if (!info[0]->IsArray()) {
-		Nan::ThrowTypeError("The argument must be an array");
-	}
-	v8::Local<v8::Array> jsChannels = v8::Local<v8::Array>::Cast(info[0]);
-
-	unsigned int L = jsChannels->Length();
-	std::vector<cv::Mat> vChannels(L);
-	for (unsigned int i = 0; i < L; i++) {
-		Matrix * matObject = Nan::ObjectWrap::Unwrap<Matrix>(jsChannels->Get(i)->ToObject());
-		vChannels[i] = matObject->mat;
-	}
-
-	cv::Mat result;
-	cv::hconcat(vChannels, result);
-	info.GetReturnValue().Set(result);
-	return;
-
-}
-
-NAN_METHOD(OpenCV::Hconcat) {
-	if (!info[0]->IsArray()) {
-		Nan::ThrowTypeError("The argument must be an array");
-	}
-	v8::Local<v8::Array> jsChannels = v8::Local<v8::Array>::Cast(info[0]);
-
-	unsigned int L = jsChannels->Length();
-	std::vector<cv::Mat> vChannels(L);
-	for (unsigned int i = 0; i < L; i++) {
-		Matrix * matObject = Nan::ObjectWrap::Unwrap<Matrix>(jsChannels->Get(i)->ToObject());
-		vChannels[i] = matObject->mat;
-	}
-
-	cv::Mat result;
-	cv::vconcat(vChannels, result);
-	info.GetReturnValue().Set(result);
-	return;
-
-}
 #else
 NAN_METHOD(OpenCV::ReadImageMulti) {
   info.GetReturnValue().Set(Nan::New<Boolean>(false));
